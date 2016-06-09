@@ -49,12 +49,11 @@ def registerPlayer(name):
     conn.commit()
     conn.close()
 
+
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
-
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
-
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
         id: the player's unique id (assigned by the database)
@@ -62,29 +61,26 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT id, name, wins, matches from Standings order by wins DESC;")
+    db = connect()
+    c = db.cursor()
+    c.execute("SELECT id,name,numwins,totalmatch FROM standings")
     rows = c.fetchall()
-    conn.close()
+    db.close();
     return rows
+
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
-
     Args:
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
-      HA HA HA HA - ALMOST BROKE MY HEAD --- READ THE FLIPPIN COMMENTS
+      ATTENTION^^ ATTENTION^^ ATTENTION^^^^^^^^^
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO Matches (red_team,blue_team,victor) VALUES (%s,%s,1)",(winner,loser))
-    c.execute("INSERT INTO Matches (red_team,blue_team,victor) VALUES (%s,%s,0)",(loser,winner))
-    conn.commit()
-    conn.close();
-    
-
+    db = connect()
+    c = db.cursor()
+    c.execute("INSERT INTO Matches (blue_team,red_team,victor) VALUES (%s,%s,%s)",(winner,loser,winner))
+    db.commit()
+    db.close();
  
  
 def swissPairings():
@@ -102,5 +98,22 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    db = connect()
+    c = db.cursor()
+    c.execute("SELECT * FROM Standings;")
+    list_players = c.fetchall()
+    db.commit()
+    db.close()
+ 
+    pairing = []
 
+    for i, player in enumerate(list_players):
+        if i%2 == 0:
+            #Match = ([(even#Rank), even#Rank_name],[(even#Rank)+1, (even#Rank+1)_name]
+            match = (list_players[i][0],
+                     list_players[i][1],
+                     list_players[i+1][0],
+                     list_players[i+1][1])
 
+            pairing.append(match)
+    return pairing
