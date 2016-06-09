@@ -72,11 +72,12 @@ create view gamelog as
 			) as gamecount
 		group by playerid;
 
+-- Standings returns subquery Results with coalesce fixing null returned from gamelog (fixes error returned by python test)
 create view Standings as
-Select results.id as id, results.name as name, results.numwins as numwins, coalesce(gamelog.totalmatch, 0) as totalmatch
-from (select players.id, players.name, winlist.numwins 
-from players, winlist 
-where players.id = winlist.id) as results 
-left join gamelog
-on results.id = gamelog.playerid
-order by numwins desc;
+	Select results.id as id, results.name as name, results.numwins as numwins, coalesce(gamelog.totalmatch, 0) as totalmatch
+	FROM (select players.id, players.name, winlist.numwins 
+		FROM players, winlist 
+		WHERE players.id = winlist.id) as results 
+	LEFT JOIN gamelog
+	ON results.id = gamelog.playerid
+	ORDER BY numwins desc;
